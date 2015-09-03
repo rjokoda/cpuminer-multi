@@ -103,8 +103,8 @@ if HAVE_WINDOWS
 endif
 
 cpuminer_LDFLAGS	= @LDFLAGS@
-#cpuminer_LDADD	= @LIBCURL@ @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@
-cpuminer_LDADD = /usr/local/lib/libcurl.a -lwldap32 /usr/lib/libz.a -lws2_32 -lcrypto @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@
+cpuminer_LDADD	= @LIBCURL@ @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@
+#cpuminer_LDADD = /usr/local/lib/libcurl.a -lwldap32 /usr/lib/libz.a -lws2_32 -lcrypto @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@
 cpuminer_CPPFLAGS = @LIBCURL_CPPFLAGS@ $(ALL_INCLUDES)
 cpuminer_CFLAGS   = -Wno-pointer-sign -Wno-pointer-to-int-cast $(disable_flags)
 

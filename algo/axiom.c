@@ -3,102 +3,212 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "crypto/mshabal.h"
-
 #ifdef __AVX2__
 #define __8WAY__
 #endif
 
+#define ALIGNED_TO 128
+
+#ifndef _MSC_VER
+#define __MINGW__
+#endif
+
+#include "crypto/mshabal.h"
+
 typedef uint32_t hash_t[8];
 
-void printHash(hash_t h)
-{
-	printf("%u-%u-%u-%u-%u-%u-%u-%u\n", h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]);
-}
+//void printHash(unsigned int* h)
+//{
+//	printf("%u-%u-%u-%u-%u-%u-%u-%u\n", h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7]);
+//}
 
-void axiomhash4way(mshabal_context* ctx_org, void* memspace, const void *input1, void *result1, const void *input2, void *result2, const void *input3, void *result3, const void *input4, void *result4)
-{
-	mshabal_context ctx_shabal;
-	int i, b;
-	hash_t *hash1, *hash2, *hash3, *hash4;
+#ifndef __MINGW__
+__declspec(align(ALIGNED_TO))
+#endif
+const uint32_t mshabal8_init_state[] = { 1392002386U, 1392002386U, 1392002386U, 1392002386U, 1392002386U, 1392002386U, 1392002386U, 1392002386U, 3846928793U, 3846928793U, 3846928793U, 3846928793U, 3846928793U, 3846928793U, 3846928793U, 3846928793U, 764339180U, 764339180U, 764339180U, 764339180U, 764339180U, 764339180U, 764339180U, 764339180U, 3110359441U, 3110359441U, 3110359441U, 3110359441U, 3110359441U, 3110359441U, 3110359441U, 3110359441U, 3758590854U, 3758590854U, 3758590854U, 3758590854U, 3758590854U, 3758590854U, 3758590854U, 3758590854U, 3145483465U, 3145483465U, 3145483465U, 3145483465U, 3145483465U, 3145483465U, 3145483465U, 3145483465U, 3535126986U, 3535126986U, 3535126986U, 3535126986U, 3535126986U, 3535126986U, 3535126986U, 3535126986U, 2966612876U, 2966612876U, 2966612876U, 2966612876U, 2966612876U, 2966612876U, 2966612876U, 2966612876U, 349067845U, 349067845U, 349067845U, 349067845U, 349067845U, 349067845U, 349067845U, 349067845U, 581914844U, 581914844U, 581914844U, 581914844U, 581914844U, 581914844U, 581914844U, 581914844U, 4026383467U, 4026383467U, 4026383467U, 4026383467U, 4026383467U, 4026383467U, 4026383467U, 4026383467U, 3944855370U, 3944855370U, 3944855370U, 3944855370U, 3944855370U, 3944855370U, 3944855370U, 3944855370U, 3042297582U, 3042297582U, 3042297582U, 3042297582U, 3042297582U, 3042297582U, 3042297582U, 3042297582U, 1047594390U, 1047594390U, 1047594390U, 1047594390U, 1047594390U, 1047594390U, 1047594390U, 1047594390U, 2804573487U, 2804573487U, 2804573487U, 2804573487U, 2804573487U, 2804573487U, 2804573487U, 2804573487U, 2466337119U, 2466337119U, 2466337119U, 2466337119U, 2466337119U, 2466337119U, 2466337119U, 2466337119U, 3660104186U, 3660104186U, 3660104186U, 3660104186U, 3660104186U, 3660104186U, 3660104186U, 3660104186U, 1768937576U, 1768937576U, 1768937576U, 1768937576U, 1768937576U, 1768937576U, 1768937576U, 1768937576U, 2629222258U, 2629222258U, 2629222258U, 2629222258U, 2629222258U, 2629222258U, 2629222258U, 2629222258U, 184434690U, 184434690U, 184434690U, 184434690U, 184434690U, 184434690U, 184434690U, 184434690U, 2799711765U, 2799711765U, 2799711765U, 2799711765U, 2799711765U, 2799711765U, 2799711765U, 2799711765U, 1362674132U, 1362674132U, 1362674132U, 1362674132U, 1362674132U, 1362674132U, 1362674132U, 1362674132U, 3189859078U, 3189859078U, 3189859078U, 3189859078U, 3189859078U, 3189859078U, 3189859078U, 3189859078U, 3012266128U, 3012266128U, 3012266128U, 3012266128U, 3012266128U, 3012266128U, 3012266128U, 3012266128U, 1051244907U, 1051244907U, 1051244907U, 1051244907U, 1051244907U, 1051244907U, 1051244907U, 1051244907U, 848932068U, 848932068U, 848932068U, 848932068U, 848932068U, 848932068U, 848932068U, 848932068U, 814894548U, 814894548U, 814894548U, 814894548U, 814894548U, 814894548U, 814894548U, 814894548U, 1439380645U, 1439380645U, 1439380645U, 1439380645U, 1439380645U, 1439380645U, 1439380645U, 1439380645U, 3020288049U, 3020288049U, 3020288049U, 3020288049U, 3020288049U, 3020288049U, 3020288049U, 3020288049U, 3290644154U, 3290644154U, 3290644154U, 3290644154U, 3290644154U, 3290644154U, 3290644154U, 3290644154U, 3010673017U, 3010673017U, 3010673017U, 3010673017U, 3010673017U, 3010673017U, 3010673017U, 3010673017U, 3235749205U, 3235749205U, 3235749205U, 3235749205U, 3235749205U, 3235749205U, 3235749205U, 3235749205U, 3306956974U, 3306956974U, 3306956974U, 3306956974U, 3306956974U, 3306956974U, 3306956974U, 3306956974U, 2737289441U, 2737289441U, 2737289441U, 2737289441U, 2737289441U, 2737289441U, 2737289441U, 2737289441U, 1455776103U, 1455776103U, 1455776103U, 1455776103U, 1455776103U, 1455776103U, 1455776103U, 1455776103U, 3982574643U, 3982574643U, 3982574643U, 3982574643U, 3982574643U, 3982574643U, 3982574643U, 3982574643U, 2293603680U, 2293603680U, 2293603680U, 2293603680U, 2293603680U, 2293603680U, 2293603680U, 2293603680U, 1625476794U, 1625476794U, 1625476794U, 1625476794U, 1625476794U, 1625476794U, 1625476794U, 1625476794U, 1972063115U, 1972063115U, 1972063115U, 1972063115U, 1972063115U, 1972063115U, 1972063115U, 1972063115U, 2213030527U, 2213030527U, 2213030527U, 2213030527U, 2213030527U, 2213030527U, 2213030527U, 2213030527U, 3163981864U, 3163981864U, 3163981864U, 3163981864U, 3163981864U, 3163981864U, 3163981864U, 3163981864U, 3873442807U, 3873442807U, 3873442807U, 3873442807U, 3873442807U, 3873442807U, 3873442807U, 3873442807U, 3129187925U, 3129187925U, 3129187925U, 3129187925U, 3129187925U, 3129187925U, 3129187925U, 3129187925U, 2605259872U, 2605259872U, 2605259872U, 2605259872U, 2605259872U, 2605259872U, 2605259872U, 2605259872U }; 
+#ifdef __MINGW__
+__attribute__((aligned(ALIGNED_TO)))
+#endif
 
-	hash1 = memspace;
-	memset(hash1, 0, 65536 * 32 * 4);
-	hash2 = &hash1[65536 * 1];
-	hash3 = &hash1[65536 * 2];
-	hash4 = &hash1[65536 * 3];
+#ifndef __MINGW__
+__declspec(align(ALIGNED_TO))
+#endif
+const uint32_t mshabal4_init_state[] = { 1392002386U, 1392002386U, 1392002386U, 1392002386U, 
+										 3846928793U, 3846928793U, 3846928793U, 3846928793U, 
+										 764339180U, 764339180U, 764339180U, 764339180U, 
+										 3110359441U, 3110359441U, 3110359441U, 3110359441U, 
+										 3758590854U, 3758590854U, 3758590854U, 3758590854U,  
+										 3145483465U, 3145483465U, 3145483465U, 3145483465U, 
+										 3535126986U, 3535126986U, 3535126986U, 3535126986U,  
+										 2966612876U, 2966612876U, 2966612876U, 2966612876U, 
+										 349067845U, 349067845U, 349067845U, 349067845U, 
+										 581914844U, 581914844U, 581914844U, 581914844U, 
+										 4026383467U, 4026383467U, 4026383467U, 4026383467U, 
+										 3944855370U, 3944855370U, 3944855370U, 3944855370U, 
+										 3042297582U, 3042297582U, 3042297582U, 3042297582U, 
+										 1047594390U, 1047594390U, 1047594390U, 1047594390U, 
+										 2804573487U, 2804573487U, 2804573487U, 2804573487U, 
+										 2466337119U, 2466337119U, 2466337119U, 2466337119U, 
+										 3660104186U, 3660104186U, 3660104186U, 3660104186U, 
+										 1768937576U, 1768937576U, 1768937576U, 1768937576U, 
+										 2629222258U, 2629222258U, 2629222258U, 2629222258U, 
+										 184434690U, 184434690U, 184434690U, 184434690U,
+										 2799711765U, 2799711765U, 2799711765U, 2799711765U, 
+										 1362674132U, 1362674132U, 1362674132U, 1362674132U, 
+										 3189859078U, 3189859078U, 3189859078U, 3189859078U, 
+										 3012266128U, 3012266128U, 3012266128U, 3012266128U, 
+										 1051244907U, 1051244907U, 1051244907U, 1051244907U, 
+										 848932068U, 848932068U, 848932068U, 848932068U, 
+										 814894548U, 814894548U, 814894548U, 814894548U,
+										 1439380645U, 1439380645U, 1439380645U, 1439380645U, 
+										 3020288049U, 3020288049U, 3020288049U, 3020288049U, 
+										 3290644154U, 3290644154U, 3290644154U, 3290644154U,
+										 3010673017U, 3010673017U, 3010673017U, 3010673017U, 
+										 3235749205U, 3235749205U, 3235749205U, 3235749205U,
+										 3306956974U, 3306956974U, 3306956974U, 3306956974U, 
+										 2737289441U, 2737289441U, 2737289441U, 2737289441U,
+										 1455776103U, 1455776103U, 1455776103U, 1455776103U,
+										 3982574643U, 3982574643U, 3982574643U, 3982574643U, 
+										 2293603680U, 2293603680U, 2293603680U, 2293603680U,
+										 1625476794U, 1625476794U, 1625476794U, 1625476794U, 
+										 1972063115U, 1972063115U, 1972063115U, 1972063115U, 
+										 2213030527U, 2213030527U, 2213030527U, 2213030527U,
+										 3163981864U, 3163981864U, 3163981864U, 3163981864U,
+										 3873442807U, 3873442807U, 3873442807U, 3873442807U,
+										 3129187925U, 3129187925U, 3129187925U, 3129187925U,
+										 2605259872U, 2605259872U, 2605259872U, 2605259872U };
+#ifdef __MINGW__
+__attribute__((aligned(ALIGNED_TO)))
+#endif
 
-	memcpy(&ctx_shabal, ctx_org, sizeof(mshabal_context));
-	mshabal(&ctx_shabal, input1, input2, input3, input4, 80);
-	mshabal_close(&ctx_shabal, hash1[0], hash2[0], hash3[0], hash4[0]);
+#define MOD65535_INDEX_AVX(a0, a1, a2, a3, a4, a5, a6, a7, b, i) \
+__m256i vec = _mm256_setr_epi32(a0, a1, a2, a3, a4, a5, a6, a7); \
+__m256i mask = _mm256_set1_epi32(0xffff); \
+vec = _mm256_add_epi32(_mm256_srli_epi32(vec, 16), _mm256_and_si256(vec, mask)); \
+vec = _mm256_and_si256(_mm256_add_epi32(vec, _mm256_srli_epi32(_mm256_add_epi32(vec, _mm256_set1_epi32(1)), 16)), mask); \
+vec = _mm256_and_si256(_mm256_add_epi32(vec, _mm256_set1_epi32(i)), mask); \
+_mm256_store_si256((__m256i *)b, vec);
 
-	for (i = 1; i < 65536; i++)
-	{
-		memcpy(&ctx_shabal, ctx_org, sizeof(mshabal_context));
-		mshabal(&ctx_shabal, hash1[i - 1], hash2[i - 1], hash3[i - 1], hash4[i - 1], 32);
-		mshabal_close(&ctx_shabal, hash1[i], hash2[i], hash3[i], hash4[i]);
-	}
+#define MOD65535_INDEX_SSE(a0, a1, a2, a3, b, i) \
+__m128i vec = _mm_setr_epi32(a0, a1, a2, a3); \
+__m128i mask = _mm_set1_epi32(0xffff); \
+vec = _mm_add_epi32(_mm_srli_epi32(vec, 16), _mm_and_si128(vec, mask)); \
+vec = _mm_and_si128(_mm_add_epi32(vec, _mm_srli_epi32(_mm_add_epi32(vec, _mm_set1_epi32(1)), 16)), mask); \
+vec = _mm_and_si128(_mm_add_epi32(vec, _mm_set1_epi32(i)), mask); \
+_mm_store_si128((__m128i *)b, vec);
 
-	for (b = 0; b < 65536; b++)
-	{
-		int p = b > 0 ? b - 1 : 0xffff;
-		int q1 = hash1[p][0] % 0xffff;
-		int j1 = (b + q1) % 65536;
-		int q2 = hash2[p][0] % 0xffff;
-		int j2 = (b + q2) % 65536;
-		int q3 = hash3[p][0] % 0xffff;
-		int j3 = (b + q3) % 65536;
-		int q4 = hash4[p][0] % 0xffff;
-		int j4 = (b + q4) % 65536;
+#define FREE_MEM_AVX \
+ALIGNED_FREE(endiandata_1); \
+ALIGNED_FREE(endiandata_2); \
+ALIGNED_FREE(endiandata_3); \
+ALIGNED_FREE(endiandata_4); \
+ALIGNED_FREE(endiandata_5); \
+ALIGNED_FREE(endiandata_6); \
+ALIGNED_FREE(endiandata_7); \
+ALIGNED_FREE(endiandata_8); \
+ALIGNED_FREE(hash64_1); \
+ALIGNED_FREE(hash64_2); \
+ALIGNED_FREE(hash64_3); \
+ALIGNED_FREE(hash64_4); \
+ALIGNED_FREE(hash64_5); \
+ALIGNED_FREE(hash64_6); \
+ALIGNED_FREE(hash64_7); \
+ALIGNED_FREE(hash64_8); \
+ALIGNED_FREE(ji); \
+ALIGNED_FREE(memspace); \
+ALIGNED_FREE(memspace2); \
+ALIGNED_FREE(ctx_shabal); \
+ALIGNED_FREE(ctx_shabal_org);
 
-		uint8_t _hash1[64];
-		uint8_t _hash2[64];
-		uint8_t _hash3[64];
-		uint8_t _hash4[64];
+#define FREE_MEM_SSE \
+ALIGNED_FREE(endiandata_1); \
+ALIGNED_FREE(endiandata_2); \
+ALIGNED_FREE(endiandata_3); \
+ALIGNED_FREE(endiandata_4); \
+ALIGNED_FREE(hash64_1); \
+ALIGNED_FREE(hash64_2); \
+ALIGNED_FREE(hash64_3); \
+ALIGNED_FREE(hash64_4); \
+ALIGNED_FREE(ji); \
+ALIGNED_FREE(memspace); \
+ALIGNED_FREE(memspace2); \
+ALIGNED_FREE(ctx_shabal); \
+ALIGNED_FREE(ctx_shabal_org);
 
-		memcpy(_hash1, hash1[p], 32);
-		memcpy(&_hash1[32], hash1[j1], 32);
-		memcpy(_hash2, hash2[p], 32);
-		memcpy(&_hash2[32], hash2[j2], 32);
-		memcpy(_hash3, hash3[p], 32);
-		memcpy(&_hash3[32], hash3[j3], 32);
-		memcpy(_hash4, hash4[p], 32);
-		memcpy(&_hash4[32], hash4[j4], 32);
 
-		memcpy(&ctx_shabal, ctx_org, sizeof(mshabal_context));
-		mshabal(&ctx_shabal, _hash1, _hash2, _hash3, _hash4, 64);
-		mshabal_close(&ctx_shabal, hash1[b], hash2[b], hash3[b], hash4[b]);
-	}
-
-	//printf("4way:\n");
-	//printHash(hash1[0xffff]);
-	//printHash(hash2[0xffff]);
-	//printHash(hash3[0xffff]);
-	//printHash(hash4[0xffff]);
-
-	memcpy(result1, hash1[0xffff], 32);
-	memcpy(result2, hash2[0xffff], 32);
-	memcpy(result3, hash3[0xffff], 32);
-	memcpy(result4, hash4[0xffff], 32);
-}
+#ifdef __MINGW__
+#define CTXCOPY \
+    for(size_t j = 0; j < 12; j++) { \
+        ctx_shabal->stateA[j].d = ctx_shabal_org->stateA[j].d; \
+	    } \
+    for(size_t j = 0; j < 16; j++) { \
+        ctx_shabal->stateB[j].d = ctx_shabal_org->stateB[j].d; \
+	    } \
+    for(size_t j = 0; j < 16; j++) { \
+        ctx_shabal->stateC[j].d = ctx_shabal_org->stateC[j].d; \
+	    }
+#else
+#define CTXCOPY \
+	ctx_shabal->stateA[0].d = ctx_shabal_org->stateA[0].d; \
+	ctx_shabal->stateA[1].d = ctx_shabal_org->stateA[1].d; \
+	ctx_shabal->stateA[2].d = ctx_shabal_org->stateA[2].d; \
+	ctx_shabal->stateA[3].d = ctx_shabal_org->stateA[3].d; \
+	ctx_shabal->stateA[4].d = ctx_shabal_org->stateA[4].d; \
+	ctx_shabal->stateA[5].d = ctx_shabal_org->stateA[5].d; \
+	ctx_shabal->stateA[6].d = ctx_shabal_org->stateA[6].d; \
+	ctx_shabal->stateA[7].d = ctx_shabal_org->stateA[7].d; \
+	ctx_shabal->stateA[8].d = ctx_shabal_org->stateA[8].d; \
+	ctx_shabal->stateA[9].d = ctx_shabal_org->stateA[9].d; \
+	ctx_shabal->stateA[10].d = ctx_shabal_org->stateA[10].d; \
+	ctx_shabal->stateA[11].d = ctx_shabal_org->stateA[11].d; \
+	ctx_shabal->stateB[0].d = ctx_shabal_org->stateB[0].d; \
+	ctx_shabal->stateB[1].d = ctx_shabal_org->stateB[1].d; \
+	ctx_shabal->stateB[2].d = ctx_shabal_org->stateB[2].d; \
+	ctx_shabal->stateB[3].d = ctx_shabal_org->stateB[3].d; \
+	ctx_shabal->stateB[4].d = ctx_shabal_org->stateB[4].d; \
+	ctx_shabal->stateB[5].d = ctx_shabal_org->stateB[5].d; \
+	ctx_shabal->stateB[6].d = ctx_shabal_org->stateB[6].d; \
+	ctx_shabal->stateB[7].d = ctx_shabal_org->stateB[7].d; \
+	ctx_shabal->stateB[8].d = ctx_shabal_org->stateB[8].d; \
+	ctx_shabal->stateB[9].d = ctx_shabal_org->stateB[9].d; \
+	ctx_shabal->stateB[10].d = ctx_shabal_org->stateB[10].d; \
+	ctx_shabal->stateB[11].d = ctx_shabal_org->stateB[11].d; \
+	ctx_shabal->stateB[12].d = ctx_shabal_org->stateB[12].d; \
+	ctx_shabal->stateB[13].d = ctx_shabal_org->stateB[13].d; \
+	ctx_shabal->stateB[14].d = ctx_shabal_org->stateB[14].d; \
+	ctx_shabal->stateB[15].d = ctx_shabal_org->stateB[15].d; \
+	ctx_shabal->stateC[0].d = ctx_shabal_org->stateC[0].d; \
+	ctx_shabal->stateC[1].d = ctx_shabal_org->stateC[1].d; \
+	ctx_shabal->stateC[2].d = ctx_shabal_org->stateC[2].d; \
+	ctx_shabal->stateC[3].d = ctx_shabal_org->stateC[3].d; \
+	ctx_shabal->stateC[4].d = ctx_shabal_org->stateC[4].d; \
+	ctx_shabal->stateC[5].d = ctx_shabal_org->stateC[5].d; \
+	ctx_shabal->stateC[6].d = ctx_shabal_org->stateC[6].d; \
+	ctx_shabal->stateC[7].d = ctx_shabal_org->stateC[7].d; \
+	ctx_shabal->stateC[8].d = ctx_shabal_org->stateC[8].d; \
+	ctx_shabal->stateC[9].d = ctx_shabal_org->stateC[9].d; \
+	ctx_shabal->stateC[10].d = ctx_shabal_org->stateC[10].d; \
+	ctx_shabal->stateC[11].d = ctx_shabal_org->stateC[11].d; \
+	ctx_shabal->stateC[12].d = ctx_shabal_org->stateC[12].d; \
+	ctx_shabal->stateC[13].d = ctx_shabal_org->stateC[13].d; \
+	ctx_shabal->stateC[14].d = ctx_shabal_org->stateC[14].d; \
+	ctx_shabal->stateC[15].d = ctx_shabal_org->stateC[15].d;
+#endif
 
 #ifdef __8WAY__
-void axiomhash8way(mshabal8_context* ctx_org, void* memspace, 
-	const void *input1, void *result1, 
-	const void *input2, void *result2, 
-	const void *input3, void *result3, 
-	const void *input4, void *result4,
-	const void *input5, void *result5,
-	const void *input6, void *result6,
-	const void *input7, void *result7,
-	const void *input8, void *result8)
+void axiomhash8way(mshabal8_context *ctx_shabal, mshabal8_context *ctx_shabal_org, void *memspace, void *memspace2, uint32_t *ji,
+const uint32_t *input1, uint32_t *result1,
+const uint32_t *input2, uint32_t *result2,
+const uint32_t *input3, uint32_t *result3,
+const uint32_t *input4, uint32_t *result4,
+const uint32_t *input5, uint32_t *result5,
+const uint32_t *input6, uint32_t *result6,
+const uint32_t *input7, uint32_t *result7,
+const uint32_t *input8, uint32_t *result8)
 {
-	mshabal8_context ctx_shabal;
-	int i, b;
 	hash_t *hash1, *hash2, *hash3, *hash4, *hash5, *hash6, *hash7, *hash8;
 
-	hash1 = memspace;
-	memset(hash1, 0, 65536 * 32 * 8);
+	hash1 = memspace2;
 	hash2 = &hash1[65536 * 1];
 	hash3 = &hash1[65536 * 2];
 	hash4 = &hash1[65536 * 3];
@@ -107,119 +217,114 @@ void axiomhash8way(mshabal8_context* ctx_org, void* memspace,
 	hash7 = &hash1[65536 * 6];
 	hash8 = &hash1[65536 * 7];
 
-	memcpy(&ctx_shabal, ctx_org, sizeof(mshabal8_context));
-	mshabal8(&ctx_shabal, input1, input2, input3, input4, input5, input6, input7, input8, 80);
-	mshabal8_close(&ctx_shabal, hash1[0], hash2[0], hash3[0], hash4[0], hash5[0], hash6[0], hash7[0], hash8[0]);
+	CTXCOPY;
 
-	for (i = 1; i < 65536; i++)
+	mshabal8_80(ctx_shabal, input1, input2, input3, input4, input5, input6, input7, input8, memspace);
+
+	for (size_t i = 1; i < 65536; i++)
 	{
-		memcpy(&ctx_shabal, ctx_org, sizeof(mshabal8_context));
-		mshabal8(&ctx_shabal, hash1[i - 1], hash2[i - 1], hash3[i - 1], hash4[i - 1], hash5[i - 1], hash6[i - 1], hash7[i - 1], hash8[i - 1], 32);
-		mshabal8_close(&ctx_shabal, hash1[i], hash2[i], hash3[i], hash4[i], hash5[i], hash6[i], hash7[i], hash8[i]);
+		CTXCOPY;
+
+		mshabal8_32(ctx_shabal, memspace, hash1[i], hash2[i], hash3[i], hash4[i], hash5[i], hash6[i], hash7[i], hash8[i], i);
 	}
 
-	for (b = 0; b < 65536; b++)
+	for (size_t i = 0; i < 65535; i++)
 	{
-		int p = b > 0 ? b - 1 : 0xffff;
-		int q1 = hash1[p][0] % 0xffff;
-		int j1 = (b + q1) % 65536;
-		int q2 = hash2[p][0] % 0xffff;
-		int j2 = (b + q2) % 65536;
-		int q3 = hash3[p][0] % 0xffff;
-		int j3 = (b + q3) % 65536;
-		int q4 = hash4[p][0] % 0xffff;
-		int j4 = (b + q4) % 65536;
+		uint16_t p = i - 1;
 
-		int q5 = hash5[p][0] % 0xffff;
-		int j5 = (b + q5) % 65536;
-		int q6 = hash6[p][0] % 0xffff;
-		int j6 = (b + q6) % 65536;
-		int q7 = hash7[p][0] % 0xffff;
-		int j7 = (b + q7) % 65536;
-		int q8 = hash8[p][0] % 0xffff;
-		int j8 = (b + q8) % 65536;
+		CTXCOPY;
 
-		uint8_t _hash1[64];
-		uint8_t _hash2[64];
-		uint8_t _hash3[64];
-		uint8_t _hash4[64];
-		uint8_t _hash5[64];
-		uint8_t _hash6[64];
-		uint8_t _hash7[64];
-		uint8_t _hash8[64];
+		MOD65535_INDEX_AVX(hash1[p][0], hash2[p][0], hash3[p][0], hash4[p][0], hash5[p][0], hash6[p][0], hash7[p][0], hash8[p][0], ji, i);
 
-		memcpy(_hash1, hash1[p], 32);
-		memcpy(&_hash1[32], hash1[j1], 32);
-		memcpy(_hash2, hash2[p], 32);
-		memcpy(&_hash2[32], hash2[j2], 32);
-		memcpy(_hash3, hash3[p], 32);
-		memcpy(&_hash3[32], hash3[j3], 32);
-		memcpy(_hash4, hash4[p], 32);
-		memcpy(&_hash4[32], hash4[j4], 32);
-
-		memcpy(_hash5, hash5[p], 32);
-		memcpy(&_hash5[32], hash5[j5], 32);
-		memcpy(_hash6, hash6[p], 32);
-		memcpy(&_hash6[32], hash6[j6], 32);
-		memcpy(_hash7, hash7[p], 32);
-		memcpy(&_hash7[32], hash7[j7], 32);
-		memcpy(_hash8, hash8[p], 32);
-		memcpy(&_hash8[32], hash8[j8], 32);
-
-		memcpy(&ctx_shabal, ctx_org, sizeof(mshabal8_context));
-		mshabal8(&ctx_shabal, _hash1, _hash2, _hash3, _hash4, _hash5, _hash6, _hash7, _hash8, 64);
-		mshabal8_close(&ctx_shabal, hash1[b], hash2[b], hash3[b], hash4[b], hash5[b], hash6[b], hash7[b], hash8[b]);
+		mshabal8_64(ctx_shabal, hash1[p], hash2[p], hash3[p], hash4[p], hash5[p], hash6[p], hash7[p], hash8[p],
+			hash1[ji[0]], hash2[ji[1]], hash3[ji[2]], hash4[ji[3]], hash5[ji[4]], hash6[ji[5]], hash7[ji[6]], hash8[ji[7]],
+			hash1[i], hash2[i], hash3[i], hash4[i], hash5[i], hash6[i], hash7[i], hash8[i]);
 	}
 
-	//printf("8way:\n");
-	//printHash(hash1[0xffff]);
-	//printHash(hash2[0xffff]);
-	//printHash(hash3[0xffff]);
-	//printHash(hash4[0xffff]);
-	//printHash(hash5[0xffff]);
-	//printHash(hash6[0xffff]);
-	//printHash(hash7[0xffff]);
-	//printHash(hash8[0xffff]);
+	{
+		CTXCOPY;
 
-	memcpy(result1, hash1[0xffff], 32);
-	memcpy(result2, hash2[0xffff], 32);
-	memcpy(result3, hash3[0xffff], 32);
-	memcpy(result4, hash4[0xffff], 32);
-	memcpy(result5, hash5[0xffff], 32);
-	memcpy(result6, hash6[0xffff], 32);
-	memcpy(result7, hash7[0xffff], 32);
-	memcpy(result8, hash8[0xffff], 32);
+		MOD65535_INDEX_AVX(hash1[65534][0], hash2[65534][0], hash3[65534][0], hash4[65534][0], hash5[65534][0], hash6[65534][0], hash7[65534][0], hash8[65534][0], ji, 65535);
+
+		mshabal8_64(ctx_shabal, hash1[65534], hash2[65534], hash3[65534], hash4[65534], hash5[65534], hash6[65534], hash7[65534], hash8[65534],
+			hash1[ji[0]], hash2[ji[1]], hash3[ji[2]], hash4[ji[3]], hash5[ji[4]], hash6[ji[5]], hash7[ji[6]], hash8[ji[7]],
+			result1, result2, result3, result4, result5, result6, result7, result8);
+	}
 }
 #endif
 
+void axiomhash4way(mshabal4_context *ctx_shabal, mshabal4_context *ctx_shabal_org, void *memspace, void *memspace2, uint32_t *ji,
+	const uint32_t *input1, uint32_t *result1,
+	const uint32_t *input2, uint32_t *result2,
+	const uint32_t *input3, uint32_t *result3,
+	const uint32_t *input4, uint32_t *result4)
+{
+	hash_t *hash1, *hash2, *hash3, *hash4;
+
+	hash1 = memspace2;
+	hash2 = &hash1[65536 * 1];
+	hash3 = &hash1[65536 * 2];
+	hash4 = &hash1[65536 * 3];
+
+	CTXCOPY;
+
+	mshabal4_80(ctx_shabal, input1, input2, input3, input4, memspace);
+
+	for (size_t i = 1; i < 65536; i++)
+	{
+		CTXCOPY;
+
+		mshabal4_32(ctx_shabal, memspace, hash1[i], hash2[i], hash3[i], hash4[i], i);
+	}
+
+	for (size_t i = 0; i < 65535; i++)
+	{
+		uint16_t p = i - 1;
+
+		CTXCOPY;
+
+		MOD65535_INDEX_SSE(hash1[p][0], hash2[p][0], hash3[p][0], hash4[p][0], ji, i);
+
+		mshabal4_64(ctx_shabal, hash1[p], hash2[p], hash3[p], hash4[p],
+			hash1[ji[0]], hash2[ji[1]], hash3[ji[2]], hash4[ji[3]],
+			hash1[i], hash2[i], hash3[i], hash4[i]);
+	}
+
+	{
+		CTXCOPY;
+
+		MOD65535_INDEX_SSE(hash1[65534][0], hash2[65534][0], hash3[65534][0], hash4[65534][0], ji, 65535);
+
+		mshabal4_64(ctx_shabal, hash1[65534], hash2[65534], hash3[65534], hash4[65534],
+			hash1[ji[0]], hash2[ji[1]], hash3[ji[2]], hash4[ji[3]],
+			result1, result2, result3, result4);
+	}
+}
 
 int scanhash_axiom(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
 	uint32_t max_nonce, uint64_t *hashes_done, uint32_t *nonces, int *nonces_len)
 {
+	uint32_t *hash64_1, *hash64_2, *hash64_3, *hash64_4
 #ifdef __8WAY__
-#define HASHES 8
-#else
-#define HASHES 4
-#endif
-
-	uint32_t _ALIGN(128) hash64_1[8], hash64_2[8], hash64_3[8], hash64_4[8]
-#ifdef __8WAY__
-		, hash64_5[8], hash64_6[8], hash64_7[8], hash64_8[8]
+		, *hash64_5, *hash64_6, *hash64_7, *hash64_8
 #endif
 		;
 
-	uint32_t _ALIGN(128) endiandata_1[20], endiandata_2[20], endiandata_3[20], endiandata_4[20]
+	uint32_t *endiandata_1, *endiandata_2, *endiandata_3, *endiandata_4
 #ifdef __8WAY__
-		, endiandata_5[20], endiandata_6[20], endiandata_7[20], endiandata_8[20]
+		, *endiandata_5, *endiandata_6, *endiandata_7, *endiandata_8
 #endif
 		;
 
 #ifdef __8WAY__
-	mshabal8_context ctx_org;
+	mshabal8_context 
 #else
-	mshabal_context ctx_org;
+	mshabal4_context
 #endif
-	void* memspace;
+		*ctx_shabal, *ctx_shabal_org;
+
+	void *memspace, *memspace2;
+	uint32_t *ji;
 
 	const uint32_t Htarg = ptarget[7];
 	const uint32_t first_nonce = pdata[19];
@@ -228,29 +333,103 @@ int scanhash_axiom(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
 
 	*nonces_len = 0;
 
-	// to avoid small chance of generating duplicate shares
-	max_nonce = (max_nonce / HASHES) * HASHES;
+#ifdef WIN32
+#define ALIGNED_ALLOC(alignment, size) \
+    _aligned_malloc(size, alignment);
+#define ALIGNED_FREE(ptr) \
+    _aligned_free(ptr);
+#else
+#define ALIGNED_ALLOC(alignment, size) \
+    aligned_alloc(alignment, size);
+#define ALIGNED_FREE(ptr) \
+    free(ptr);
+#endif
 
-	for (int i = 0; i < 19; i++) {
+	hash64_1 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 8);
+	hash64_2 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 8);
+	hash64_3 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 8);
+	hash64_4 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 8);
+
+	endiandata_1 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 20);
+	endiandata_2 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 20);
+	endiandata_3 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 20);
+	endiandata_4 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 20);
+
+#ifdef __8WAY__
+	ctx_shabal = ALIGNED_ALLOC(ALIGNED_TO, sizeof(mshabal8_context));
+	ctx_shabal_org = ALIGNED_ALLOC(ALIGNED_TO, sizeof(mshabal8_context));
+
+	for (size_t j = 0; j < 12; j++) {
+		for (size_t k = 0; k < 8; k++) {
+			ctx_shabal_org->stateA[j].w[k] = mshabal8_init_state[j * 8 + k];
+		}
+	}
+	for (size_t j = 0; j < 16; j++) {
+		for (size_t k = 0; k < 8; k++) {
+			ctx_shabal_org->stateB[j].w[k] = mshabal8_init_state[(j + 12) * 8 + k];
+		}
+	}
+	for (size_t j = 0; j < 16; j++) {
+		for (size_t k = 0; k < 8; k++) {
+			ctx_shabal_org->stateC[j].w[k] = mshabal8_init_state[(j + 12 + 16) * 8 + k];
+		}
+	}
+
+	memspace = ALIGNED_ALLOC(ALIGNED_TO, 65536 * sizeof(uint32_t) * 8 * 8);
+	memspace2 = ALIGNED_ALLOC(ALIGNED_TO, 65536 * sizeof(uint32_t) * 8 * 8);
+
+	hash64_5 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 8);
+	hash64_6 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 8);
+	hash64_7 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 8);
+	hash64_8 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 8);
+
+	endiandata_5 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 20);
+	endiandata_6 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 20);
+	endiandata_7 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 20);
+	endiandata_8 = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 20);
+
+	ji = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 8);
+#else
+	ctx_shabal = ALIGNED_ALLOC(ALIGNED_TO, sizeof(mshabal4_context));
+	ctx_shabal_org = ALIGNED_ALLOC(ALIGNED_TO, sizeof(mshabal4_context));
+
+	for (size_t j = 0; j < 12; j++) {
+		for (size_t k = 0; k < 4; k++) {
+			ctx_shabal_org->stateA[j].w[k] = mshabal4_init_state[j * 4 + k];
+		}
+	}
+	for (size_t j = 0; j < 16; j++) {
+		for (size_t k = 0; k < 4; k++) {
+			ctx_shabal_org->stateB[j].w[k] = mshabal4_init_state[(j + 12) * 4 + k];
+		}
+	}
+	for (size_t j = 0; j < 16; j++) {
+		for (size_t k = 0; k < 4; k++) {
+			ctx_shabal_org->stateC[j].w[k] = mshabal4_init_state[(j + 12 + 16) * 4 + k];
+		}
+	}
+
+	memspace = ALIGNED_ALLOC(ALIGNED_TO, 65536 * sizeof(uint32_t) * 8 * 4);
+	memspace2 = ALIGNED_ALLOC(ALIGNED_TO, 65536 * sizeof(uint32_t) * 8 * 4);
+
+	ji = ALIGNED_ALLOC(ALIGNED_TO, sizeof(uint32_t) * 4);
+#endif
+
+	for (size_t i = 0; i < 19; i++) {
 		be32enc(&endiandata_1[i], pdata[i]);
 	}
 
-	memcpy(endiandata_2, endiandata_1, sizeof(endiandata_1));
-	memcpy(endiandata_3, endiandata_1, sizeof(endiandata_1));
-	memcpy(endiandata_4, endiandata_1, sizeof(endiandata_1));
+	for (size_t i = 0; i < 20; i++) {
+		endiandata_2[i] = endiandata_1[i];
+		endiandata_3[i] = endiandata_1[i];
+		endiandata_4[i] = endiandata_1[i];
 #ifdef __8WAY__
-	memcpy(endiandata_5, endiandata_1, sizeof(endiandata_1));
-	memcpy(endiandata_6, endiandata_1, sizeof(endiandata_1));
-	memcpy(endiandata_7, endiandata_1, sizeof(endiandata_1));
-	memcpy(endiandata_8, endiandata_1, sizeof(endiandata_1));
+		endiandata_5[i] = endiandata_1[i];
+		endiandata_6[i] = endiandata_1[i];
+		endiandata_7[i] = endiandata_1[i];
+		endiandata_8[i] = endiandata_1[i];
 #endif
-
-#ifdef __8WAY__
-	mshabal8_init(&ctx_org, 256);
-#else
-	mshabal_init(&ctx_org, 256);
-#endif
-	memspace = malloc(65536 * 32 * HASHES);
+	}
 
 	do {
 		be32enc(&endiandata_1[19], n);
@@ -265,10 +444,16 @@ int scanhash_axiom(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
 #endif
 
 #ifdef __8WAY__
-		axiomhash8way(&ctx_org, memspace, endiandata_1, hash64_1, endiandata_2, hash64_2, endiandata_3, hash64_3, endiandata_4, hash64_4,
+		axiomhash8way(ctx_shabal, ctx_shabal_org, memspace, memspace2, ji, endiandata_1, hash64_1, endiandata_2, hash64_2, endiandata_3, hash64_3, endiandata_4, hash64_4,
 			endiandata_5, hash64_5, endiandata_6, hash64_6, endiandata_7, hash64_7, endiandata_8, hash64_8);
 #else
-		axiomhash4way(&ctx_org, memspace, endiandata_1, hash64_1, endiandata_2, hash64_2, endiandata_3, hash64_3, endiandata_4, hash64_4);
+		axiomhash4way(ctx_shabal, ctx_shabal_org, memspace, memspace2, ji, endiandata_1, hash64_1, endiandata_2, hash64_2, endiandata_3, hash64_3, endiandata_4, hash64_4);
+#endif
+
+#ifdef __8WAY__
+		(*hashes_done) += 8;
+#else
+		(*hashes_done) += 4;
 #endif
 
 		if (hash64_1[7] < Htarg && fulltest(hash64_1, ptarget)) {
@@ -283,7 +468,6 @@ int scanhash_axiom(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
 		if (hash64_4[7] < Htarg && fulltest(hash64_4, ptarget)) {
 			nonces[(*nonces_len)++] = n + 3;
 		}
-
 #ifdef __8WAY__
 		if (hash64_5[7] < Htarg && fulltest(hash64_5, ptarget)) {
 			nonces[(*nonces_len)++] = n + 4;
@@ -299,20 +483,29 @@ int scanhash_axiom(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
 		}
 #endif
 
-		n += HASHES;
+#ifdef __8WAY__
+		n += 8;
+#else
+		n += 4;
+#endif
 
-		if ((*nonces_len) > 0)
-		{
-			*hashes_done = n - first_nonce;
+		if ((*nonces_len) > 0) {
 			pdata[19] = n;
-			free(memspace);
+#ifdef __8WAY__
+			FREE_MEM_AVX;
+#else
+			FREE_MEM_SSE
+#endif
 			return true;
 		}
 
-	} while (n < max_nonce && !work_restart[thr_id].restart);
+	} while (unlikely(n < max_nonce) && !work_restart[thr_id].restart);
 
-	*hashes_done = n - first_nonce;
 	pdata[19] = n;
-	free(memspace);
+#ifdef __8WAY__
+	FREE_MEM_AVX;
+#else
+	FREE_MEM_SSE
+#endif
 	return 0;
 }

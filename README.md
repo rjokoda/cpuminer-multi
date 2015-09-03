@@ -1,3 +1,6 @@
+﻿Special thanks to sandor111 (https://bitcointalk.org/index.php?action=profile;u=42873) for providing Axiom CPU optimizations!
+His BTC for donations: 1AMsjqzXQpRunxUmtn3xzQ5cMdhV7fmet2
+
 CPUMiner-Multi
 ==============
 

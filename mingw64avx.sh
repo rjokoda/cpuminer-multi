@@ -6,7 +6,7 @@ CURL_PREFIX=/usr/local
 SSL_PREFIX=/usr/local/ssl
 
 # gcc 4.4
-extracflags="-Ofast -march=native -falign-functions=16 -falign-jumps=16 -falign-loops=16 -falign-labels=16 -mno-vzeroupper -std=gnu11 -s" # -funroll-loops -fvariable-expansion-in-unroller -fbranch-target-load-optimize2 -fsched2-use-superblocks -falign-loops=16 -falign-functions=16 -falign-jumps=16 -falign-labels=16"
+extracflags="-Ofast -mavx2 -falign-functions=16 -falign-jumps=16 -falign-loops=16 -falign-labels=16 -mno-vzeroupper -std=gnu11 -s" # -funroll-loops -fvariable-expansion-in-unroller -fbranch-target-load-optimize2 -fsched2-use-superblocks -falign-loops=16 -falign-functions=16 -falign-jumps=16 -falign-labels=16"
 
 # gcc 4.8+
 # extracflags="$extracflags -Ofast -fuse-linker-plugin -ftree-loop-if-convert-stores" # -flto "

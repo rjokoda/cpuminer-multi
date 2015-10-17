@@ -106,6 +106,7 @@ enum algos {
 	ALGO_X14,         /* X14 */
 	ALGO_X15,         /* X15 Whirlpool */
 	ALGO_ZR5,
+	ALGO_SCRYPTJANE,
 	ALGO_COUNT
 };
 
@@ -144,6 +145,7 @@ static const char *algo_names[] = {
 	"x14",
 	"x15",
 	"zr5",
+	"scryptjane",
 	"\0"
 };
 
@@ -279,6 +281,7 @@ Options:\n\
                           x14          X14\n\
                           x15          X15\n\
                           zr5          ZR5\n\
+                          scryptjane:N\n\
   -o, --url=URL         URL of mining server\n\
   -O, --userpass=U:P    username:password pair for mining server\n\
   -u, --user=USERNAME   username for mining server\n\
@@ -903,6 +906,7 @@ static int share_result(int result, struct work *work, const char *reason)
 	case ALGO_AXIOM:
 	case ALGO_CRYPTONIGHT:
 	case ALGO_PLUCK:
+	case ALGO_SCRYPTJANE:
 		sprintf(s, hashrate >= 1e6 ? "%.0f" : "%.2f", hashrate);
 		applog(LOG_NOTICE, "accepted: %lu/%lu (%.2f%%), %s H/s %s",
 			accepted_count, accepted_count + rejected_count,
@@ -1557,6 +1561,7 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 			case ALGO_SCRYPT:
 			case ALGO_NEOSCRYPT:
 			case ALGO_PLUCK:
+			case ALGO_SCRYPTJANE:
 				diff_to_target(work->target, sctx->job.diff / (65536.0 * opt_diff_factor));
 				break;
 			case ALGO_FRESH:
@@ -1838,6 +1843,7 @@ static void *miner_thread(void *userdata)
 				break;
 			case ALGO_AXIOM:
 			case ALGO_CRYPTONIGHT:
+			case ALGO_SCRYPTJANE:
 				max64 = 0x40LL;
 				break;
 			case ALGO_DROP:
@@ -2019,7 +2025,10 @@ static void *miner_thread(void *userdata)
 			break;
 		case ALGO_CRYPTONIGHT:
 			rc = scanhash_cryptonight(thr_id, work.data, work.target,
-					max_nonce, &hashes_done);
+				max_nonce, &hashes_done);
+			break;
+		case ALGO_SCRYPTJANE:
+			rc = scanhash_scryptjane(opt_scrypt_n, thr_id, work.data, work.target, max_nonce, &hashes_done);
 			break;
 
 		default:
@@ -2041,6 +2050,7 @@ static void *miner_thread(void *userdata)
 			case ALGO_AXIOM:
 			case ALGO_CRYPTONIGHT:
 			case ALGO_PLUCK:
+			case ALGO_SCRYPTJANE:
 				applog(LOG_INFO, "CPU #%d: %.2f H/s", thr_id, thr_hashrates[thr_id]);
 				break;
 			default:
@@ -2057,6 +2067,8 @@ static void *miner_thread(void *userdata)
 			if (i == opt_n_threads) {
 				switch(opt_algo) {
 				case ALGO_CRYPTONIGHT:
+				case ALGO_AXIOM:
+				case ALGO_SCRYPTJANE:
 					sprintf(s, "%.3f", hashrate);
 					applog(LOG_NOTICE, "Total: %s H/s", s);
 					break;
@@ -2477,7 +2489,7 @@ void parse_arg(int key, char *arg)
 				if (arg[v] == ':') {
 					char *ep;
 					v = strtol(arg+v+1, &ep, 10);
-					if (*ep || v & (v-1) || v < 2)
+					if (*ep || (i == ALGO_SCRYPT && v & (v-1)) || v < 2)
 						continue;
 					opt_algo = (enum algos) i;
 					opt_scrypt_n = v;
@@ -2505,6 +2517,8 @@ void parse_arg(int key, char *arg)
 		}
 		if (!opt_nfactor && opt_algo == ALGO_SCRYPT)
 			opt_nfactor = 9;
+		if (opt_algo == ALGO_SCRYPTJANE && opt_scrypt_n == 0)
+			opt_scrypt_n = 5;
 		break;
 	case 'b':
 		p = strstr(arg, ":");
@@ -2915,7 +2929,8 @@ static int thread_create(struct thr_info *thr, void* func)
 static void show_credits()
 {
 	printf("** " PACKAGE_NAME " " PACKAGE_VERSION " by Tanguy Pruvot (tpruvot@github) **\n");
-	printf("BTC donation address: 1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd\n\n");
+	printf("BTC donation address: 1FhDPLPpw18X4srecguG3MxJYe4a1JsZnd\n");
+	printf("Modified by NiceHash (www.nicehash.com)\n\n");
 }
 
 void get_defconfig_path(char *out, size_t bufsize, char *argv0);

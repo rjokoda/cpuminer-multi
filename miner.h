@@ -292,6 +292,9 @@ void cryptonight_hash(void* output, const void* input, int input_len);
 int scanhash_cryptonight(int thr_id, uint32_t *pdata, const uint32_t *ptarget,
                             uint32_t max_nonce, uint64_t *hashes_done);
 
+int scanhash_scryptjane(int Nfactor, int thr_id, uint32_t *pdata, const uint32_t *ptarget,
+	uint32_t max_nonce, uint64_t *hashes_done);
+
 /* api related */
 void *api_thread(void *userdata);
 

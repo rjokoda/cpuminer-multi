@@ -455,7 +455,10 @@ static void affine_to_cpu_mask(int id, uint8_t mask) { }
 
 void get_currentalgo(char* buf, int sz)
 {
-	snprintf(buf, sz, "%s", algo_names[opt_algo]);
+	if (opt_algo == ALGO_SCRYPTJANE)
+		snprintf(buf, sz, "%s:%d", algo_names[opt_algo], opt_scrypt_n);
+	else
+		snprintf(buf, sz, "%s", algo_names[opt_algo]);
 }
 
 void proper_exit(int reason)

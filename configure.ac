@@ -69,6 +69,13 @@ case $MINGW_TARGET in
     ;;
 esac
 
+have_sdk_dir=false
+if test -n "$SDK_DIR"; then
+  have_sdk_dir=true
+  CPPFLAGS="-I$SDK_DIR/include $CPPFLAGS"
+  LDFLAGS="-L$SDK_DIR/lib/$target $LDFLAGS"
+fi
+
 AC_ARG_ENABLE([assembly],
   AS_HELP_STRING([--disable-assembly], [disable assembly-language routines]))
 if test x$enable_assembly != xno; then
@@ -139,28 +146,9 @@ else
 	JANSSON_LIBS=-ljansson
 fi
 
-# libcurl install path (for mingw : --with-curl=/usr/local)
-AC_ARG_WITH([curl],
-   [  --with-curl=PATH         prefix where curl is installed [default=/usr]])
+LIBCURL_CHECK_CONFIG(, 7.15.2, , [AC_MSG_ERROR([Missing required libcurl >= 7.15.2])])
 
-if test -n "$with_curl" ; then
-   LIBCURL_CFLAGS="$LIBCURL_CFLAGS -I$with_curl/include"
-   LIBCURL_LDFLAGS="-L$with_curl/lib $LIBCURL_LDFLAGS"
-   LIBCURL="-lcurl -lz"
-fi
-
-# SSL install path (for mingw : --with-crypto=/usr/local/ssl)
-AC_ARG_WITH([crypto],
-   [  --with-crypto=PATH       prefix where openssl crypto is installed [default=/usr]])
-
-if test -n "$with_crypto" ; then
-   LIBCURL_CFLAGS="$LIBCURL_CFLAGS -I$with_crypto/include"
-   LIBCURL_LDFLAGS="-L$with_crypto/lib $LIBCURL_LDFLAGS"
-   LIBCURL="$LIBCURL -lssl -lcrypto"
-fi
-
-CFLAGS="$CFLAGS $LIBCURL_CFLAGS"
-LDFLAGS="$LDFLAGS $LIBCURL_LDFLAGS"
+AC_CHECK_LIB([crypto], [OPENSSL_init], [], [AC_MSG_FAILURE([could not find crypto])])
 
 #AC_CHECK_LIB([z],[gzopen],[],[])
 #AC_CHECK_LIB([crypto],[OPENSSL_init], crypto=yes, [AC_MSG_ERROR([OpenSSL crypto library required])])

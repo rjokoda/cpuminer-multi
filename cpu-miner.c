@@ -973,7 +973,7 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 			}
 			char *hashhex = abin2hex(hash, 32);
 			snprintf(s, JSON_BUF_LEN,
-					"{\"method\": \"submit\", \"params\": {\"id\": \"%s\", \"job_id\": \"%s\", \"nonce\": \"%s\", \"result\": \"%s\"}, \"id\":4}\r\n",
+					"{\"method\": \"submit\", \"params\": {\"id\": \"%s\", \"job_id\": \"%s\", \"nonce\": \"%s\", \"result\": \"%s\"}, \"id\":4}",
 					rpc2_id, work->job_id, noncestr, hashhex);
 			free(hashhex);
 		} else {
@@ -1736,6 +1736,8 @@ static void *miner_thread(void *userdata)
 		}
 
 		uint32_t *nonceptr = (uint32_t*) (((char*)work.data) + nonce_oft);
+		if (opt_algo == ALGO_CRYPTONIGHT)
+			end_nonce = (*nonceptr & 0xff000000U) + (0xffffffU / opt_n_threads * (thr_id + 1) - 0x20);
 
 		if (have_stratum) {
 			while (!jsonrpc_2 && time(NULL) >= g_work_time + 120)
@@ -1782,9 +1784,12 @@ static void *miner_thread(void *userdata)
 			work_free(&work);
 			work_copy(&work, &g_work);
 			nonceptr = (uint32_t*) (((char*)work.data) + nonce_oft);
-			*nonceptr = 0xffffffffU / opt_n_threads * thr_id;
-			if (opt_randomize)
-				nonceptr[0] += ((rand()*4) & UINT32_MAX) / opt_n_threads;
+			if (opt_algo == ALGO_CRYPTONIGHT)
+				*nonceptr = (*nonceptr & 0xff000000U) + (0xffffffU / opt_n_threads * thr_id);
+			else if (opt_randomize)
+				nonceptr[0] += ((rand() * 4) & UINT32_MAX) / opt_n_threads;
+			else
+				*nonceptr = 0xffffffffU / opt_n_threads * thr_id;
 		} else
 			++(*nonceptr);
 		pthread_mutex_unlock(&g_work_lock);

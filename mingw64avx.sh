@@ -21,7 +21,7 @@ windres res/icon.rc icon.o
 ./configure --build=x86_64-w64-mingw32 --with-crypto=$SSL_PREFIX --with-curl=$CURL_PREFIX \
 	CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" LDFLAGS="icon.o"
 
-make
+make -j8
 
 strip -p --strip-debug --strip-unneeded cpuminer.exe
 

@@ -543,5 +543,6 @@ void x15hash(void *output, const void *input);
 void zr5hash(void *output, const void *input);
 void zr5hash_pok(void *output, uint32_t *pdata);
 
+void init_lyra2re_ctx();
 
 #endif /* __MINER_H__ */

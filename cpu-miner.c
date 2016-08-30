@@ -1589,9 +1589,12 @@ bool rpc2_stratum_job(struct stratum_ctx *sctx, json_t *params)
 	ret = rpc2_job_decode(params, &sctx->work);
 
 	if (ret) {
-		work_free(&g_work);
-		work_copy(&g_work, &sctx->work);
-		g_work_time = 0;
+		//work_free(&g_work);
+		//work_copy(&g_work, &sctx->work);
+		if (sctx->job.job_id)
+			free(sctx->job.job_id);
+		sctx->job.job_id = strdup(sctx->work.job_id);
+		//g_work_time = 0;
 	}
 
 	pthread_mutex_unlock(&sctx->work_lock);
